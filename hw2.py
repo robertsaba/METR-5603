@@ -85,14 +85,14 @@ plt.savefig(f'{path}HW 2/radiative_budget.png', dpi = 250)
 #%% compute resample averages 
 # loop through the following for each time 
 for i in [5, 30]:
-    # set the timedelta in seconds 
-    interval = i * 60 * 10 
+    # # set the timedelta in seconds 
+    # interval = i * 60 * 10 
     
-    int_start = np.arange(0, len(df), interval)
+    # int_start = np.arange(0, len(df), interval)
     
-    int_end = int_start + interval
+    # int_end = int_start + interval
     
-    dts = [df_dt[0] + dt.timedelta(seconds = i * interval/2) for i in range(len(int_start))]
+    # dts = [df_dt[0] + dt.timedelta(seconds = i * interval/10) for i in range(len(int_start))]
     
     # # create arrays to store variables 
     # tke = np.ones_like(int_start) * np.nan
@@ -207,12 +207,15 @@ for i in [5, 30]:
     t_interp = np.interp(stamps_2, stamps_1, df['T'].values)
     
     # pull the soil moisture temp 
-    sm = sm142[14].values
+    sm = sm143[14].values
     
     # create arrays for H and LE 
     H = np.ones_like(int_start) * np.nan
     LE = np.ones_like(int_start) * np.nan
     G = np.ones_like(int_start) * np.nan
+    
+    # create net radiation array
+    net_rad = np.ones_like(int_start) * np.nan
     
     # loop and create arrays 
     for idx in range(len(int_start)):
@@ -230,6 +233,8 @@ for i in [5, 30]:
         LE[idx] = rho * L/1000 * np.nanmean(w_prime * q_prime)
         
         G[idx] = np.nanmean(sm[idxx])
+        
+        net_rad[idx] = np.nanmean(sm142[10][idxx])
 
     # close any previously used figure 
     plt.close() 
@@ -267,16 +272,19 @@ for i in [5, 30]:
     ax[0].plot(dts[day_i], LE[day_i], label = 'latent heat flux', c = 'b')
     ax[0].plot(dts[day_i], G[day_i], label = 'soil heat flux', c = 'lime')
     ax[0].plot(dts[day_i], G[day_i] + LE[day_i] + H[day_i], label = 'net heat flux', c = 'orange')
+    ax[0].plot(dts[day_i], net_rad[day_i], c = 'k', label = 'observed net heat flux')
     
     # mask the arrays for night
     H[day_i] = np.nan
     LE[day_i] = np.nan
     G[day_i] = np.nan
+    net_rad[day_i] = np.nan
     
     ax[1].plot(dts, H, label = 'sensible heat flux', c = 'r')
     ax[1].plot(dts, LE, label = 'latent heat flux', c = 'b')
     ax[1].plot(dts, G, label = 'soil heat flux', c = 'lime')
     ax[1].plot(dts, G + LE + H, label = 'net heat flux', c = 'orange')
+    ax[1].plot(dts, net_rad, c = 'k', label = 'observed net heat flux')
     
     ax[0].set_title('Daytime Energy Budget Components')
     ax[1].set_title('Nighttime Energy Budget Components')
@@ -293,8 +301,14 @@ for i in [5, 30]:
         
     ax[0].set_ylabel('$Wm^{-2}$')
     
-    plt.savefig(f'{path}HW 2/day_night_{i}.png', dpi = 250)
+    # add plot labels
+    ax[0].add_artist(AnchoredText('A', loc = 'upper right', frameon = False, prop = {'fontsize': 14, 'weight': 'bold'}))
+    ax[1].add_artist(AnchoredText('B', loc = 'upper right', frameon = False, prop = {'fontsize': 14, 'weight': 'bold'}))
     
+    ax[0].legend(loc = 'upper left')
+    ax[1].legend(loc = 'upper left')
+    
+    plt.savefig(f'{path}HW 2/day_night_{i}.png', dpi = 250)
 
 
 
